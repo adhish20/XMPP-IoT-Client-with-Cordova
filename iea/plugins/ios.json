@@ -1,0 +1,75 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {
+            "config.xml": {
+                "parents": {
+                    "/*": [
+                        {
+                            "xml": "<feature name=\"Console\"><param name=\"ios-package\" value=\"CDVLogger\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Device\"><param name=\"ios-package\" value=\"CDVDevice\" /></feature>",
+                            "count": 1
+                        }
+                    ],
+                    "/widget": [
+                        {
+                            "xml": "<feature name=\"IosSocketsCommon\"><param name=\"ios-package\" value=\"IosSocketsCommon\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"ChromeSocketsTcp\"><param name=\"ios-package\" value=\"ChromeSocketsTcp\" /></feature>",
+                            "count": 1
+                        }
+                    ]
+                }
+            },
+            "framework": {
+                "parents": {
+                    "Security.framework": [
+                        {
+                            "xml": false,
+                            "count": 2
+                        }
+                    ],
+                    "CFNetwork.framework": [
+                        {
+                            "xml": false,
+                            "count": 2
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "installed_plugins": {
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        },
+        "org.apache.cordova.console": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        },
+        "org.apache.cordova.device": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        },
+        "cordova-plugin-chrome-apps-sockets-tcp": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        },
+        "cordova-plugin-websocket": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        }
+    },
+    "dependent_plugins": {
+        "cordova-plugin-chrome-apps-common": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        },
+        "cordova-plugin-chrome-apps-iossocketscommon": {
+            "PACKAGE_NAME": "com.adhish.iea"
+        }
+    }
+}
