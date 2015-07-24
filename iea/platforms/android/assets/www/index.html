@@ -37,27 +37,22 @@
     </head>
     <body>
 	    <div class="app">
-				<div data-role="header">
-					<h1>IoT Client</h1>
-				</div>
+			<h1>IoT Client</h1>
 
-				<div data-role="content">
-					<form class="login label" id="loginForm">
-							<label for="username">Username:</label>
-							<input type="text" name="username" id="username" value="" placeholder="Username" />
+			<form class="login label" id="loginForm">
+				<label for="username">Username:</label>
+				<input type="text" name="username" id="username" value="" placeholder="Username" />
 
-							<label for="password">Password:</label>
-							<input type="password" name="password" id="password" value="" placeholder="Password" />
+				<label for="password">Password:</label>
+				<input type="password" name="password" id="password" value="" placeholder="Password" />
 
-							<input type="submit" value="Login" id="submitButton">
-					</form>
-				</div>
+				<input type="submit" value="Login" name="submitButton" id="submitButton" onclick="app.handleLogin()" />
+			</form>
 
-				<div data-role="footer">
-					<h4 class="blink">XMPP Standards Foundation</h4>
-				</div>
-    <ul id="roster" class="table-view">
-	</ul>
+			<h4 class="blink">XMPP Standards Foundation</h4>
+
+            <ul id="roster" class="table-view"></ul>
+
 		</div>
 
         <script src="lib/jquery-1.10.2.js"></script>
@@ -66,7 +61,7 @@
         <script src="lib/strophe.disco.js"></script>
         <script src="lib/strophe.vcard.js"></script>
         <script type="text/javascript" src="cordova.js"></script>
-        <script type="lib/javascript" src="cordova.js"></script>
+        <!--<script type="lib/javascript" src="cordova.js"></script>-->
         <script type="text/javascript" src="js/index.js"></script>
     </body>
 </html>
