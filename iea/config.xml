@@ -8,6 +8,7 @@
         Adhish Singla
     </author>
     <content src="index.html" />
+    <preference name="orientation" value="portrait" />
     <plugin name="cordova-plugin-whitelist" version="1" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -19,6 +20,7 @@
     <platform name="android">
         <allow-intent href="market:*" />
         <allow-intent href="http://*/*" />
+        <allow-intent href="https://*/*" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />

@@ -1,56 +1,35 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 var SEQNR = 1;
 var app = {
 
     connection: null,
+    contacts: [],
     // Application Constructor
     initialize: function() {
         this.bindEvents();
     },
-    // Bind Event Listeners
-    //
-    // Bind any events that are required on startup. Common events are:
-    // 'load', 'deviceready', 'offline', and 'online'.
+
     bindEvents: function() {
-        $(document).bind('mobileinit',function(){
-                $.mobile.loadingMessage = false;
-            });
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
-    // deviceready Event Handler
-    //
-    // The scope of 'this' is the event. In order to call the 'receivedEvent'
-    // function, we must explicitly call 'app.receivedEvent(...);'
+
     onDeviceReady: function() {
-        //$("#loginForm").on("submit",app.handleLogin);
-        //app.receivedEvent('deviceready');
+    	$(".contact").click(function(){
+			$(this).next("ul").toggle();
+		});
     },
 
     on_chat_message: function(stanza) {
         alert('New chat message from: ' + $(stanza).attr('from'));
         return true;
     },
+
     on_presence: function(stanza) {
     	var from = $(stanza).attr('from');
     	var name = $(stanza).attr('name') || from;
     	var type = $(stanza).attr('type');
+    	if(Strophe.getBareJidFromJid(from) == Strophe.getBareJidFromJid(app.connection.jid)){
+    		return true;
+    	}
     	app.connection.disco.info(from,
     		null,
     		function (stanza) {
@@ -68,18 +47,28 @@ var app = {
                     }
                 });
                 if(support_0323 == true && support_0323 == true){
-                    var ul = document.getElementById("roster");
-                    var li = document.createElement("li");
-                    li.appendChild(document.createTextNode(name));
-                    li.setAttribute("class","table-view-cell media");
-                    ul.appendChild(li);
+                	var index = app.getIndex(Strophe.getBareJidFromJid(from));
+                	var check = "#"+Strophe.getNodeFromJid(from)+"-li";
+                	if($(check).length == 0) {
+                		var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor and Control Device</p></div></a></li>';
+						$("#roster").append(li);
+					}
                 }
                 else if(support_0323 == true){
-                    var ul = document.getElementById("roster");
-                    var li = document.createElement("li");
-                    li.appendChild(document.createTextNode(name));
-                    li.setAttribute("class","table-view-cell media");
-                    ul.appendChild(li);
+                	var index = app.getIndex(Strophe.getBareJidFromJid(from));
+                	var check = "#"+Strophe.getNodeFromJid(from)+"-li";
+                	if($(check).length == 0) {
+	                	var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor Device</p></div></a></li>';
+						$("#roster").append(li);
+					}
+                }
+                else{
+                	var index = app.getIndex(Strophe.getBareJidFromJid(from));
+                	var check = "#"+Strophe.getNodeFromJid(from)+"-li";
+                	if($(check).length == 0) {
+	                	var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Contact</p></div></a></li>';
+						$("#roster").append(li);
+					}
                 }
             },
             function (stanza){
@@ -96,19 +85,85 @@ var app = {
         );
 		return true;
     },
+
     on_error_iq: function(stanza) {
         $(stanza).find('error').each(function() {
             alert('Info query error code: ' + $(this).attr('code'))
         });
         return true;
     },
+
     on_roster: function(stanza) {
         $(stanza).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
+            var contact = {};
+            contact.jid = jid;
+            contact.Name = Strophe.getNodeFromJid(jid);
+            contact.img = "img/xmpp.png"
+            app.contacts.push(contact);
+            app.connection.vcard.get(app.on_vcard,
+                Strophe.getBareJidFromJid(jid),
+                function (stanza) {
+                	log("Error callback from getting a vcard on " + bareJid);
+                }
+            );
 		});
 		app.connection.send($pres());
     },
+
+    on_vcard: function(stanza) {
+	    var from = $(stanza).attr('from');
+	    var bareJid = Strophe.getBareJidFromJid(from);
+		var $vCard = $(stanza).find("vCard");
+		// Update the contact's name
+		var index = app.getIndex(bareJid);
+		app.contacts[index].jid = bareJid;
+		var nickname = $vCard.find('NICKNAME').text();
+		if (nickname) {
+			//console.log(nickname);
+			app.contacts[index].Name = nickname;
+			app.updateContact(bareJid);
+		}
+		var imgData = $vCard.find('BINVAL').text();
+		if (!imgData || imgData == "") {
+		    return;
+		}
+		var imgType = $vCard.find('TYPE').text();
+		var imgSrc = 'data:' + imgType + ';base64,' + imgData;
+		app.contacts[index].img = imgSrc;
+		app.updateContactImage(bareJid);
+	},
+
+	getIndex: function (Jid) {
+		return app.contacts.map(function(el) {
+			return el.jid;
+		}).indexOf(Jid);
+	},
+
+	updateContact: function(jid){
+		var Id = $('#'+Strophe.getNodeFromJid(jid)+'-name');
+		var index = app.getIndex(jid);
+		var Name = app.contacts[index].Name;
+	    if (Id.length > 0) {
+			$(Id).text(Name);
+	    }
+	    else {
+			return;
+	    }
+	    $('#roster').listview('refresh');
+	},
+
+	updateContactImage: function(jid){
+		var btn = $('#'+Strophe.getNodeFromJid(jid)+'-li');
+		var index = app.getIndex(jid);
+		var imgSrc = app.contacts[index].img;
+	    if (btn.length > 0) {
+		var img = btn.find('img');
+		img.attr('src', imgSrc);
+		$('#roster').listview('refresh');
+    }
+	},
 
     handleLogin: function() {
     	app.connection = null;
@@ -120,9 +175,9 @@ var app = {
             app.connection.connect(username, password, function onConnect(status) {
                 if (status == Strophe.Status.CONNECTED)
                 {
-                	$("#roster").empty();
-                	alert("Connected!!!");
+                	//form.remove(); 
                     app.connection.addHandler(app.on_chat_message, null, 'message', 'chat');
+                    app.connection.addHandler(app.on_read, null, 'message');
                     app.connection.addHandler(app.on_error_iq, null, 'iq', 'error');
                     app.connection.addHandler(app.on_presence, null, 'presence');
 
@@ -136,16 +191,35 @@ var app = {
         }
     },
 
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+    readValues: function (jid){
+    	var iq = $iq({type: "get", to: jid, from: app.connection.jid}).c("req", {xmlns: "urn:xmpp:iot:sensordata", seqnr: SEQNR, momentary: "true"});
+        SEQNR = SEQNR + 1;
+        app.connection.sendIQ(iq,
+        	function (message){
+        		console.log(message);
+        	},
+            function (err){
+            	console.log(err);
+            },
+            600000
+        );
+    },
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
+    on_read: function(message){
+    	var $message = $(message);
+    	var tag = $(message).find('fields');
+        var from = $message.attr('from');
+        var jid = Strophe.getBareJidFromJid(from);
+        $(tag).find('node').each(function() {
+            $(this).find('timestamp').each(function() {
+                $(this).find('numeric').each(function() {
+                	var name = $(this).attr('name');
+                	var val = $(this).attr('value');
+                	var li = '<li class="table-view-cell media">'+name+' : '+val+'</li>'
+                	$("#"+jid+"-read").append(li);
+                });
+            });
+        });
     }
 };
 
