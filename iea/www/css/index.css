@@ -32,10 +32,10 @@ body {
 .app {
     background:url(../img/xmpp.png) no-repeat center top; /* 170px x 200px */
     position:absolute;             /* position in the center of the screen */
-    left:50%;
-    top:50%;
+    left:31%;
+    top:30%;
     height:50px;                   /* text area height */
-    width:225px;                   /* text area width */
+    width:360px;                   /* text area width */
     text-align:center;
     padding:180px 0px 0px 0px;     /* image height is 200px (bottom 20px are overlapped with text) */
     margin:-115px 0px 0px -112px;  /* offset vertical: half of image height and text area height */
@@ -72,6 +72,7 @@ h1 {
 
 .login.label {
     background-color:#4B946A;
+    font-size:16px;
     display:block;
 }
 

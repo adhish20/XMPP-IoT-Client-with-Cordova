@@ -13,10 +13,14 @@ var app = {
 	},
 
 	onDeviceReady: function() {
+		$("#submitButton").on('tap', function(){
+			app.handleLogin();
+		});
 		$(document).on('click', '.clickable li', function(event) {
 			event.stopPropagation();
 			$(this).children('ul').slideToggle();
 			$(this).parent().find('li').not(this).children('ul').slideUp();
+			event.preventDefault();
 		});
 	},
 
@@ -56,7 +60,7 @@ var app = {
 				if(support_0323 == true && support_0325 == true){
 					var check = "#"+Strophe.getNodeFromJid(from)+"-li";
 					if($(check).length == 0) {
-						var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor and Control Device</p></div></a><ul><li>hi</li><li>hi</li></ul></li>';
+						var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor and Control Device</p></div></a><ul class="table-view"><li>hi</li><li>hi</li></ul></li>';
 						$("#roster").append(li);
 					}
 				}
@@ -182,7 +186,7 @@ var app = {
 			app.connection.connect(username, password, function onConnect(status) {
 				if (status == Strophe.Status.CONNECTED)
 				{
-					//form.remove();
+					form.remove();
 					app.connection.addHandler(app.on_chat_message, null, 'message', 'chat');
 					app.connection.addHandler(app.on_read, null, 'message');
 					app.connection.addHandler(app.on_error_iq, null, 'iq', 'error');

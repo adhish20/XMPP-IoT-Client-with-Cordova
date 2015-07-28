@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' *; style-src 'self' 'unsafe-inline'; media-src *">
 		<meta name="format-detection" content="telephone=no">
 		<meta name="msapplication-tap-highlight" content="no">
-		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+		<meta name="viewport" content="user-scalable=yes, initial-scale=1, maximum-scale=3, minimum-scale=1">
 		<link rel="stylesheet" type="text/css" href="css/ratchet.css">
 		<link rel="stylesheet" type="text/css" href="css/index.css">
 		<title>IoT Client</title>
@@ -20,12 +20,12 @@
 				<label for="password">Password:</label>
 				<input type="password" name="password" id="password" value="" placeholder="Password" />
 
-				<input type="submit" value="Login" name="submitButton" id="submitButton" onclick="app.handleLogin()" />
+				<input type="button" value="Login" name="submitButton" id="submitButton" />
 			</form>
 
-			<h4 class="blink">XMPP Standards Foundation</h4>
-
 			<ul id="roster" class="table-view clickable"></ul>
+
+			<h4 class="blink">XMPP Standards Foundation</h4>
 		</div>
 		
 
