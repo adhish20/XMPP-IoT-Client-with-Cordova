@@ -96,6 +96,8 @@ ul {
     clear: both;
 }
 
+ul ul {display: none;}
+
 .media-object {
     width: 42px;
     height: 42px;
