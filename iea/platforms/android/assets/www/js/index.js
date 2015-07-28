@@ -49,7 +49,7 @@ var app = {
 				var support_0325 = false;
 				$(stanza).find('feature').each(function() {
 					var feature = $(this).attr('var');
-					console.log("var: "+feature);
+					//console.log("var: "+feature);
 					if (feature == "urn:xmpp:iot:sensordata"){
 						support_0323 = true;
 					}
@@ -60,14 +60,14 @@ var app = {
 				if(support_0323 == true && support_0325 == true){
 					var check = "#"+Strophe.getNodeFromJid(from)+"-li";
 					if($(check).length == 0) {
-						var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor and Control Device</p></div></a><ul class="table-view"><li>hi</li><li>hi</li></ul></li>';
+						var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#" onclick="app.readValues(\'' + from + '\')"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor and Control Device</p></div></a><ul id="'+Strophe.getNodeFromJid(from)+'-read" class="table-read"></ul></li>';
 						$("#roster").append(li);
 					}
 				}
 				else if(support_0323 == true){
 					var check = "#"+Strophe.getNodeFromJid(from)+"-li";
 					if($(check).length == 0) {
-						var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor Device</p></div></a></li>';
+						var li = '<li id="'+Strophe.getNodeFromJid(from)+'-li" class="table-view-cell media"><a href="#" onclick="app.readValues(\'' + from + '\')"><img class="media-object pull-left" src="'+app.contacts[index].img+'"><div id="'+Strophe.getNodeFromJid(from)+'-name" class="media-body">'+app.contacts[index].Name+'<p>Sensor Device</p></div></a><ul id="'+Strophe.getNodeFromJid(from)+'-read" class="table-read"></ul></li>';
 						$("#roster").append(li);
 					}
 				}
@@ -157,6 +157,7 @@ var app = {
 		var index = app.getIndex(jid);
 		var Name = app.contacts[index].Name;
 		if (Id.length > 0) {
+			console.log("Hi");
 			$(Id).text(Name);
 		}
 		else {
@@ -170,10 +171,10 @@ var app = {
 		var index = app.getIndex(jid);
 		var imgSrc = app.contacts[index].img;
 		if (btn.length > 0) {
-		var img = btn.find('img');
-		img.attr('src', imgSrc);
-		$('#roster').listview('refresh');
-	}
+			var img = btn.find('img');
+			img.attr('src', imgSrc);
+			$('#roster').listview('refresh');
+		}
 	},
 
 	handleLogin: function() {
@@ -220,18 +221,27 @@ var app = {
 		var $message = $(message);
 		var tag = $(message).find('fields');
 		var from = $message.attr('from');
-		var jid = Strophe.getBareJidFromJid(from);
+		var jid = Strophe.getNodeFromJid(from);
 		$(tag).find('node').each(function() {
 			$(this).find('timestamp').each(function() {
 				$(this).find('numeric').each(function() {
 					var name = $(this).attr('name');
 					var val = $(this).attr('value');
-					var li = '<li class="table-view-cell media">'+name+' : '+val+'</li>'
-					$("#"+jid+"-read").append(li);
+					var check = "#"+jid+"-"+name;
+					if($(check).length == 0) {
+						var li = '<li id="'+jid+'-'+name+'" class="table-view-cell media"><div id="'+jid+'-field-'+name+'">'+name+'</div><div id="'+jid+'-value-'+name+'">'+val+'</div></li>';
+						$("#"+jid+"-read").append(li);
+					}
+					else
+					{
+						var div = $('#'+jid+'-value-'+name);
+						$(div).text(val);
+					}
 				});
 			});
 		});
-	}
+		return true;
+	},
 };
 
 app.initialize();

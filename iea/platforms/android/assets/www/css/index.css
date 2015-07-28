@@ -19,7 +19,7 @@ body {
     );
     background-attachment:fixed;
     font-family:'HelveticaNeue-Light', 'HelveticaNeue', Helvetica, Arial, sans-serif;
-    font-size:12px;
+    font-size:17px;
     height:100%;
     margin:0px;
     padding:0px;
@@ -61,11 +61,20 @@ h1 {
     text-align:center;
 }
 
+h6 {
+    font-size:24px;
+    font-weight:normal;
+    margin:0px;
+    overflow:visible;
+    padding:0px;
+    text-align:center;
+}
+
 .login {
     border-radius:4px;
     -webkit-border-radius:4px;
     color:#FFFFFF;
-    font-size:12px;
+    font-size:16px;
     margin:0px 30px;
     padding:2px 0px;
 }
@@ -113,4 +122,12 @@ ul ul {display: none;}
   background-color: #fff;
   border-top: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
+}
+
+.table-read {
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 15px;
+  list-style: none;
+  background-color: #fff;
 }
