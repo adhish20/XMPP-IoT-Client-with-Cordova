@@ -226,22 +226,53 @@ var app = {
 			$(this).find('timestamp').each(function() {
 				$(this).find('numeric').each(function() {
 					var name = $(this).attr('name');
+					var writable = $(this).attr('writable');
 					var val = $(this).attr('value');
 					var check = "#"+jid+"-"+name;
 					if($(check).length == 0) {
-						var li = '<li id="'+jid+'-'+name+'" class="table-view-cell media"><div id="'+jid+'-field-'+name+'">'+name+'</div><div id="'+jid+'-value-'+name+'">'+val+'</div></li>';
+						if(writable == 'true')
+						{
+							var li = '<li id="'+jid+'-'+name+'" class="table-view-cell media"><div id="'+jid+'-field-'+name+'">'+name+'</div><div id="'+jid+'-value-'+name+'"><input type="text" id="'+jid+'-Inputvalue-'+name+'" value="'+val+'" /><input type="button" value="Write" onclick="app.on_write(\'' + from + '\',\'numeric\',\'' + name + '\')" /></div></li>';
+						}
+						else
+						{
+							var li = '<li id="'+jid+'-'+name+'" class="table-view-cell media"><div id="'+jid+'-field-'+name+'">'+name+'</div><div id="'+jid+'-value-'+name+'">'+val+'</div></li>';
+						}
 						$("#"+jid+"-read").append(li);
 					}
 					else
 					{
-						var div = $('#'+jid+'-value-'+name);
-						$(div).text(val);
+						if(writable == 'true')
+						{
+							$("#"+Strophe.getNodeFromJid(jid)+"-Inputvalue-"+name+"").val(val);
+						}
+						else
+						{
+							var div = $('#'+jid+'-value-'+name);
+							$(div).text(val);
+						}
 					}
 				});
 			});
 		});
 		return true;
 	},
+
+	on_write: function(from, nameType, field){
+		var jid = Strophe.getNodeFromJid(from);
+		var value = $("#"+jid+"-Inputvalue-"+field+"").val();
+		var iq = $msg({to: from, from: app.connection.jid}).c("set", {xmlns: "urn:xmpp:iot:control", seqnr: SEQNR}).c(nameType, {"name": field, "value": value});
+        SEQNR = SEQNR + 1;
+        app.connection.send(iq,
+        function (message){
+                console.log(message);
+            },
+        	function (err){
+                console.log(err);
+            },
+            600000
+        );
+	}
 };
 
 app.initialize();
