@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' *; style-src 'self' 'unsafe-inline'; media-src *">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline'; media-src *">
 		<meta name="format-detection" content="telephone=no">
 		<meta name="msapplication-tap-highlight" content="no">
 		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
@@ -22,9 +22,8 @@
 
 				<input type="button" value="Login" name="submitButton" id="submitButton" />
 			</form>
-
+			<div id="canvas"></div>
 			<ul id="roster" class="table-view clickable"></ul>
-
 			<h4 class="blink">XMPP Standards Foundation</h4>
 		</div>
 		
@@ -34,6 +33,7 @@
 		<script src="lib/strophe.js"></script>
 		<script src="lib/strophe.disco.js"></script>
 		<script src="lib/strophe.vcard.js"></script>
+		<script src="lib/Chart.js"></script>
 		<script type="text/javascript" src="cordova.js"></script>
 		<script type="text/javascript" src="js/index.js"></script>
 	</body>
