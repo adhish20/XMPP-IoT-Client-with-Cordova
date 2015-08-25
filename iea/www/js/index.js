@@ -3,19 +3,23 @@ var app = {
 
     connection: null,
     contacts: [],
-    // Application Constructor
+    
     initialize: function() {
+        // Application Constructor
         this.bindEvents();
     },
 
     bindEvents: function() {
+        //Binding Events on start of Application
         document.addEventListener('deviceready', this.onDeviceReady, false);
     },
 
     onDeviceReady: function() {
+        //Listener for Login Button
         $("#submitButton").on('tap', function(){
             app.handleLogin();
         });
+        //Dropdown List Event Listener
         $(document).on('click', '.clickable li', function(event) {
             event.stopPropagation();
             $("#Graph").remove();
@@ -26,11 +30,24 @@ var app = {
     },
 
     on_chat_message: function(stanza) {
+        /*
+        Handler Function called on receiving a message.
+        Arguments:
+            stanza : Message Stanza received by our JID.
+        */
         alert('New chat message from: ' + $(stanza).attr('from'));
         return true;
     },
 
     on_presence: function(stanza) {
+        /*
+        on_presence is a Handler which is called when we receive presence from some other JID.
+        Sending Disco Queries to ask for features.
+        Storing various resources of same JID.
+        Adding JIDs to View.
+        Arguments:
+            stanza : Presence Stanza received by our JID.
+        */
         var from = $(stanza).attr('from');
         var name = $(stanza).attr('name') || from;
         var type = $(stanza).attr('type');
@@ -38,10 +55,13 @@ var app = {
             return true;
         }
         var index = app.getIndex(Strophe.getBareJidFromJid(from));
+        
+        // Storing Resource of JID.
         var resource = Strophe.getResourceFromJid(from);
         if(app.contacts[index].resources.indexOf(resource) == -1){
             app.contacts[index].resources.push(resource);
         }
+        // Making a Disco Request to ask for features supported by the JID.
         app.connection.disco.info(from,
             null,
             function (stanza) {
@@ -59,6 +79,7 @@ var app = {
                     }
                 });
                 //console.log(from);
+                // Adding JIDs to View.
                 if(support_0323 == true && support_0325 == true){
                     var check = "#"+Strophe.getNodeFromJid(from)+"-li";
                     if($(check).length == 0) {
@@ -114,6 +135,11 @@ var app = {
     },
 
     on_error_iq: function(stanza) {
+        /*
+        Handler Function called on receiving an error.
+        Arguments:
+            stanza : Error Stanza received by our JID.
+        */
         $(stanza).find('error').each(function() {
             alert('Info query error code: ' + $(this).attr('code'))
         });
@@ -121,6 +147,12 @@ var app = {
     },
 
     on_roster: function(stanza) {
+        /*
+        Handler Function called on receiving roster.
+        Get VCard of COntact JIDs.
+        Arguments:
+            stanza : Roster Stanza contains details of all contacts and subscriptions.
+        */
         $(stanza).find('item').each(function() {
             var jid = $(this).attr('jid');
             var name = $(this).attr('name') || jid;
@@ -144,10 +176,15 @@ var app = {
     },
 
     on_vcard: function(stanza) {
+        /*
+        Callback Function called on receiving a VCard of a Contact.
+        Arguments:
+            stanza : Stanza contains information of a Contact.
+        */
         var from = $(stanza).attr('from');
         var bareJid = Strophe.getBareJidFromJid(from);
         var $vCard = $(stanza).find("vCard");
-        // Update the contact's name
+        // Update the Contact's name.
         var index = app.getIndex(bareJid);
         app.contacts[index].jid = bareJid;
         var nickname = $vCard.find('NICKNAME').text();
@@ -156,6 +193,7 @@ var app = {
             app.contacts[index].Name = nickname;
             app.updateContact(bareJid);
         }
+        // Get Image Data of the Contact.
         var imgData = $vCard.find('BINVAL').text();
         if (!imgData || imgData == "") {
             return;
@@ -167,12 +205,22 @@ var app = {
     },
 
     getIndex: function (Jid) {
+        /*
+        Function to get index of Jid in Contacts.
+        Arguments:
+            Jid : Bare JID of the Contact.
+        */
         return app.contacts.map(function(el) {
             return el.jid;
         }).indexOf(Jid);
     },
 
     updateContact: function(jid){
+        /*
+        Function to update Contact Name.
+        Arguments:
+            jid : Bare JID of the Contact.
+        */
         var Id = $('#'+Strophe.getNodeFromJid(jid)+'-name');
         var index = app.getIndex(jid);
         var Name = app.contacts[index].Name;
@@ -186,6 +234,11 @@ var app = {
     },
 
     updateContactImage: function(jid){
+        /*
+        Function to update Contact Image.
+        Arguments:
+            jid : Bare JID of the Contact.
+        */
         var btn = $('#'+Strophe.getNodeFromJid(jid)+'-li');
         var index = app.getIndex(jid);
         var imgSrc = app.contacts[index].img;
@@ -197,6 +250,10 @@ var app = {
     },
 
     handleLogin: function() {
+        /*
+        Callback Function called on Login Button being pressed.
+        Establishes Connection, Register Function Handlers and send get Roster IQ.
+        */
         app.connection = null;
         var form = $("#loginForm");
         var username = $("#username", form).val();
@@ -223,6 +280,12 @@ var app = {
     },
 
     readValues: function (jid){
+        /*
+        Function called on tapping a Contact.
+        Sends a Momentary Read IQ to the JID.
+        Arguments:
+            jid : JID of the Contact
+        */
         var iq = $iq({type: "get", to: jid, from: app.connection.jid}).c("req", {xmlns: "urn:xmpp:iot:sensordata", seqnr: SEQNR, momentary: "true"});
         SEQNR = SEQNR + 1;
         app.connection.sendIQ(iq,
@@ -237,6 +300,14 @@ var app = {
     },
 
     on_read: function(message){
+        /*
+        Callback Function called when the Values of a Device are returned on sending a Momentary/History Read IQ.
+        Message is parsed depending on if it contains Historical Data or Momentary Data.
+        For Historical it is parsed so as to give input to showGraph Function.
+        For Momentary Data it updates the fields with the new data received for each Field.
+        Arguments:
+            message : Message contains Data sent in by the device. Node, Timestamps, Fields, Values, Units, etc.
+        */
         var $message = $(message);
         var tag = $(message).find('fields');
         var from = $message.attr('from');
@@ -312,6 +383,13 @@ var app = {
     },
 
     on_write: function(from, nameType, field){
+        /*
+        Function called when a write event is triggered.
+        Arguments:
+            from : JID of the Contact.
+            nameType : type of field. e.g. 'numeric' or 'boolean'.
+            field : Name of Field whose value is to be changed.
+        */
         var jid = Strophe.getNodeFromJid(from);
         var value = $("#"+jid+"-Inputvalue-"+field+"").val();
         var iq = $msg({to: from, from: app.connection.jid}).c("set", {xmlns: "urn:xmpp:iot:control", seqnr: SEQNR}).c(nameType, {"name": field, "value": value});
@@ -328,6 +406,12 @@ var app = {
     },
 
     on_history: function(jid, field){
+        /*
+        Function called when a history event is triggered.
+        Arguments:
+            jid : JID of the Contact.
+            field : Name of Field whose hisotry is to be revealed.
+        */
         var toTime = Math.round(new Date().getTime() / 1000);
         var fromTime = toTime - 24 * 60 * 60;
         fromTime = app.formatTime(new Date(fromTime*1000));
@@ -357,6 +441,11 @@ var app = {
     },
 
     formatTime: function(localDate) {
+        /*
+        Function to Parse Time in ISO Format.
+        Arguments:
+            loacalDate : date as given by JavaScipt Date Function.
+        */
         if (!localDate) localDate = new Date();
         var tzo = -localDate.getTimezoneOffset();
         var sign = tzo >= 0 ? '+' : '-';
@@ -379,6 +468,11 @@ var app = {
     },
 
     showGraph: function(data) {
+        /*
+        Function called to plot the Graph of Historical Data.
+        Arguments:
+            data : Data parsed by on_read function for historical message.
+        */
         canvas = $('<canvas id="Graph" height="400px" width="330px" class="myChart"></canvas>');
         canvas.remove();
         $("#canvas").append(canvas);
